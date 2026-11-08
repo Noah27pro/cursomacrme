@@ -7,6 +7,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const IS_VERCEL = Boolean(process.env.VERCEL);
 
 // Configuración de Supabase
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://yhzyyebirnorxgtdhjrl.supabase.co';
@@ -56,7 +57,7 @@ app.use('/admin', requireAdmin);
 app.use('/api/reservations', requireAdmin);
 app.use('/api/config', requireAdmin);
 
-if (!fs.existsSync(DATA_DIR)) {
+if (!IS_VERCEL && !fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
@@ -69,11 +70,15 @@ const DEFAULT_CONFIG = {
   priceNow: "24.50€"
 };
 
-if (!fs.existsSync(CONFIG_FILE)) {
+if (!IS_VERCEL && !fs.existsSync(CONFIG_FILE)) {
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(DEFAULT_CONFIG, null, 2), 'utf-8');
 }
 
 function getLocalConfig() {
+  if (IS_VERCEL) {
+    return DEFAULT_CONFIG;
+  }
+
   try {
     const raw = fs.readFileSync(CONFIG_FILE, 'utf-8');
     return { ...DEFAULT_CONFIG, ...JSON.parse(raw) };
@@ -83,6 +88,10 @@ function getLocalConfig() {
 }
 
 function saveLocalConfig(data) {
+  if (IS_VERCEL) {
+    return;
+  }
+
   try {
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2), 'utf-8');
   } catch (e) {}
@@ -570,19 +579,27 @@ app.get('/api/config', async (req, res) => {
 app.post('/api/config', async (req, res) => {
   const current = getLocalConfig();
   const updated = { ...current, ...req.body };
-  saveLocalConfig(updated);
 
   if (req.body.hotmartUrl !== undefined) {
     try {
-      await supabase
+      const { error } = await supabase
         .from('ajustes')
         .upsert({ clave: 'enlace_curso', valor: req.body.hotmartUrl || 'PENDIENTE' });
+      if (error) {
+        console.error('Error guardando enlace en ajustes de Supabase:', error);
+        return res.status(500).json({ success: false, message: 'No se pudo guardar el enlace del curso.' });
+      }
     } catch (e) {
-      console.warn('Error guardando enlace en ajustes de Supabase:', e);
+      console.error('Error guardando enlace en ajustes de Supabase:', e);
+      return res.status(500).json({ success: false, message: 'No se pudo guardar el enlace del curso.' });
     }
   }
 
-  res.json({ success: true, config: updated, message: 'Configuración actualizada en Supabase y local.' });
+  if (!IS_VERCEL) {
+    saveLocalConfig(updated);
+  }
+
+  res.json({ success: true, config: updated, message: 'Configuración actualizada.' });
 });
 
 // Servir frontend
