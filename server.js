@@ -1,4 +1,5 @@
 require('dotenv').config();
+const crypto = require('crypto');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -21,6 +22,39 @@ const CONFIG_FILE = path.join(DATA_DIR, 'config.json');
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+function requireAdmin(req, res, next) {
+  const expectedPassword = process.env.ADMIN_PASSWORD;
+  if (!expectedPassword) {
+    return res.status(503).send('El panel de administración no está configurado.');
+  }
+
+  const authorization = req.get('authorization') || '';
+  const [scheme, encodedCredentials] = authorization.split(' ');
+  let credentials = '';
+
+  if (scheme === 'Basic' && encodedCredentials) {
+    credentials = Buffer.from(encodedCredentials, 'base64').toString('utf8');
+  }
+
+  const separator = credentials.indexOf(':');
+  const username = separator >= 0 ? credentials.slice(0, separator) : '';
+  const password = separator >= 0 ? credentials.slice(separator + 1) : '';
+  const expectedUsername = process.env.ADMIN_USERNAME || 'admin';
+  const actual = Buffer.from(`${username}:${password}`);
+  const expected = Buffer.from(`${expectedUsername}:${expectedPassword}`);
+
+  if (actual.length !== expected.length || !crypto.timingSafeEqual(actual, expected)) {
+    res.set('WWW-Authenticate', 'Basic realm="Panel de admisiones", charset="UTF-8"');
+    return res.status(401).send('Autenticación requerida.');
+  }
+
+  next();
+}
+
+app.use('/admin', requireAdmin);
+app.use('/api/reservations', requireAdmin);
+app.use('/api/config', requireAdmin);
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -563,11 +597,15 @@ app.use((req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(` Curso de Pulseras de Macramé`);
-  console.log(` Base de datos: SUPABASE ACTIVA (Noah27pro's Project)`);
-  console.log(`  Web de Reserva:    http://localhost:${PORT}`);
-  console.log(`  Panel de Control:  http://localhost:${PORT}/admin`);
-  console.log(`=======================================================`);
-});
+if (require.main === module && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(` Curso de Pulseras de Macramé`);
+    console.log(` Base de datos: SUPABASE ACTIVA (Noah27pro's Project)`);
+    console.log(`  Web de Reserva:    http://localhost:${PORT}`);
+    console.log(`  Panel de Control:  http://localhost:${PORT}/admin`);
+    console.log(`=======================================================`);
+  });
+}
+
+module.exports = app;

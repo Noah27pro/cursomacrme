@@ -25,6 +25,8 @@ El sistema está conectado directamente con tu proyecto de **Supabase**:
 
 ## 🚀 Cómo Iniciar el Servidor
 
+Configura las variables de `.env.example` en `.env` antes de iniciar. El panel requiere `ADMIN_PASSWORD`; si no está configurada, permanece bloqueado. El nombre de usuario predeterminado es `admin` y se puede cambiar con `ADMIN_USERNAME`.
+
 ```bash
 npm start
 ```
@@ -32,6 +34,17 @@ npm start
 
 * 🌐 **Web Principal Minimalista:** [http://localhost:3000](http://localhost:3000)
 * 🔐 **Panel de Control (Admisiones en Supabase):** [http://localhost:3000/admin](http://localhost:3000/admin)
+
+## Publicar en Vercel
+
+Importa este repositorio en Vercel y configura estas variables de entorno antes del despliegue:
+
+* `SUPABASE_URL`
+* `SUPABASE_KEY` (clave publicable/anon de Supabase; nunca uses `service_role`)
+* `ADMIN_USERNAME`
+* `ADMIN_PASSWORD` (contraseña larga y única; no la guardes en el repositorio)
+
+Después de añadir o cambiar variables, crea un nuevo despliegue. El panel y sus API requieren autenticación HTTP Basic. Vercel no conserva escrituras en el disco local entre ejecuciones; la persistencia de solicitudes y el enlace del curso depende de Supabase.
 
 ---
 
