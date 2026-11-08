@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Curso de Pulseras de Macramé | Reserva</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+
+  <!-- PANTALLA PRINCIPAL MINIMALISTA (FONDO NEGRO CON BOTÓN CENTRAL) -->
+  <main class="main-screen">
+    <div class="center-container">
+      <div class="brand-pill">
+        <span class="sparkle">✨</span>
+        <span>Curso Online · Plazas Limitadas</span>
+      </div>
+
+      <h1 class="main-title">Pulseras de Macramé</h1>
+      <p class="main-subtitle">Aprende a tejer accesorios profesionales paso a paso desde cero.</p>
+
+      <!-- BOTÓN RESERVAR CENTRAL -->
+      <div class="action-wrap">
+        <button type="button" class="btn-reservar-central" id="openReserveBtn">
+          <span>Reservar</span>
+          <span class="btn-glow"></span>
+        </button>
+      </div>
+
+      <!-- Enlace para consultar estado -->
+      <div class="footer-check">
+        <button type="button" class="btn-check-link" id="openStatusBtn">
+          🔍 ¿Ya enviaste tu formulario? Consulta el estado de tu solicitud
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL / FORMULARIO CON PREGUNTAS -->
+  <div class="modal-overlay" id="reserveModal" style="display: none;">
+    <div class="modal-card">
+      <button type="button" class="modal-close-btn" id="closeReserveBtn" aria-label="Cerrar">&times;</button>
+
+      <!-- VISTA 1: FORMULARIO CON PREGUNTAS -->
+      <div id="formSection">
+        <div class="modal-header">
+          <span class="modal-tag">Formulario de Admisión</span>
+          <h2 class="modal-title">Solicitud de Reserva</h2>
+          <p class="modal-desc">
+            Responde estas breves preguntas. El profesor revisará tus respuestas para determinar tu admisión al curso.
+          </p>
+        </div>
+
+        <form id="quizForm" class="quiz-form" novalidate>
+          <!-- Pregunta 1: Nombre opcional -->
+          <div class="form-row">
+            <label for="userName">1. Tu Nombre Completo (opcional)</label>
+            <input type="text" id="userName" name="name" placeholder="Ej. Ana Martín" />
+          </div>
+
+          <!-- Pregunta 2: Correo -->
+          <div class="form-row">
+            <label for="userEmail">2. Tu Correo Electrónico *</label>
+            <input type="email" id="userEmail" name="email" placeholder="tu.correo@ejemplo.com" required />
+            <span class="field-error" id="emailError"></span>
+          </div>
+
+          <!-- PREGUNTA CLAVE: ¿Serías capaz de pagar 40€? -->
+          <div class="form-row">
+            <label>3. ¿Serías capaz de pagar 40 euros para aprender a hacer macramé?</label>
+            <div class="options-group">
+              <label class="option-card">
+                <input type="radio" name="willingToPay40" value="Sí, totalmente" checked />
+                <span class="option-content">
+                  <span class="option-title">🟢 Sí, totalmente</span>
+                  <span class="option-desc">Valoro aprender paso a paso con acompañamiento y técnicas profesionales.</span>
+                </span>
+              </label>
+
+              <label class="option-card">
+                <input type="radio" name="willingToPay40" value="No, busco algo gratis" />
+                <span class="option-content">
+                  <span class="option-title">🔴 No, busco algo gratuito</span>
+                  <span class="option-desc">Por ahora solo busco tutoriales sin costo en internet.</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pregunta 4: Interés -->
+          <div class="form-row">
+            <label for="userInterest">4. ¿Te interesa crear pulseras de macramé?</label>
+            <select id="userInterest" name="interest">
+              <option value="Sí, me interesa">Sí, me interesa</option>
+              <option value="No, no me interesa">No, no me interesa</option>
+            </select>
+          </div>
+
+          <!-- Pregunta 5: Cómo nos encontró -->
+          <div class="form-row">
+            <label for="discoverySource">5. ¿Dónde nos has encontrado?</label>
+            <select id="discoverySource" name="source">
+              <option value="TikTok">TikTok</option>
+              <option value="Boca a boca">Boca a boca</option>
+              <option value="YouTube">YouTube</option>
+              <option value="Otros">Otros</option>
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-submit-quiz" id="btnSubmitQuiz">
+              <span>Enviar Solicitud</span>
+              <span class="arrow">→</span>
+            </button>
+          </div>
+
+          <p class="form-privacy-note">
+            🔒 Al pulsar en Enviar Solicitud, tus respuestas pasarán a revisión por el administrador.
+          </p>
+        </form>
+      </div>
+
+      <!-- VISTA 2: MENSAJE DE ESPERA DE REVISIÓN (🟡) -->
+      <div id="statePendingView" style="display: none;" class="state-result-box">
+        <div class="state-icon-bubble pending-glow">⏳</div>
+        <span class="state-pill pill-warning">SOLICITUD EN ESPERA</span>
+        <h2 class="state-title">Mensaje de Espera</h2>
+        <p class="state-message" id="pendingMsgText">
+          Tu solicitud ha sido enviada con éxito. Por favor, espera mientras el administrador revisa tus respuestas.
+        </p>
+
+        <div class="state-info-card">
+          <h4>⏳ Tu solicitud está en revisión</h4>
+          <p>
+            Hemos recibido tus respuestas correctamente. El administrador las revisará para determinar si estás admitido/a en el curso de pulseras de macramé. En cuanto tome la decisión, te avisaremos por correo electrónico y también podrás consultar tu resultado aquí con tu correo.
+          </p>
+          <div class="timeline-steps">
+            <div class="timeline-step step-done">
+              <span class="step-dot">✓</span>
+              <span>Solicitud enviada</span>
+            </div>
+            <div class="timeline-step step-current">
+              <span class="step-dot">⏳</span>
+              <span>En espera de revisión por el administrador</span>
+            </div>
+            <div class="timeline-step step-future">
+              <span class="step-dot">○</span>
+              <span>Decisión de admisión y acceso a Hotmart</span>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="btn-modal-action" id="closePendingBtn">Cerrar y esperar respuesta</button>
+      </div>
+
+      <!-- VISTA 3: MENSAJE DE ADMITIDO (🟢) -->
+      <div id="stateAdmittedView" style="display: none;" class="state-result-box">
+        <div class="state-icon-bubble admitted-glow">🎉</div>
+        <span class="state-pill pill-success">¡ADMISIÓN CONFIRMADA!</span>
+        <h2 class="state-title" id="admittedMainTitle">¡Felicidades, has conseguido la entrada al curso!</h2>
+        <p class="state-message" id="admittedMsgText">
+          Tu solicitud ha sido aprobada por el profesor. Ya tienes tu plaza asegurada.
+        </p>
+
+        <!-- TARJETA E IMAGEN DEL CURSO CLICKABLE HACIA HOTMART -->
+        <div class="course-click-section">
+          <p class="click-instructions">
+            👇 <strong>Haz clic en la imagen del curso</strong> para entrar a Hotmart y realizar el pago:
+          </p>
+
+          <a href="#" id="courseImageLink" target="_blank" rel="noopener noreferrer" class="course-card-link" title="Haz clic en la imagen para pagar en Hotmart">
+            <div class="course-image-wrapper">
+              <img src="course-cover.svg" id="courseCoverImg" alt="Curso Online Pulseras de Macramé" class="course-cover-image" />
+              <div class="course-image-overlay">
+                <span class="overlay-btn-pill">💳 Pagar en Hotmart ↗</span>
+              </div>
+            </div>
+            <div class="course-card-caption">
+              <span class="caption-badge">🔥 Hotmart Oficial</span>
+              <span class="caption-title">Pulseras de Macramé: De Cero a Emprendedora</span>
+              <span class="caption-action">Haz clic sobre la imagen para pagar →</span>
+            </div>
+          </a>
+
+          <div id="hotmartPendingNotice" style="display: none;" class="hotmart-notice-pending">
+            ⏳ El enlace de pago se está activando en Hotmart. Vuelve a comprobar en breve para pagar directamente.
+          </div>
+        </div>
+
+        <button type="button" class="btn-modal-action" id="closeAdmittedBtn" style="margin-top: 16px;">Cerrar</button>
+      </div>
+
+      <!-- VISTA 4: MENSAJE DE RECHAZADO (🔴) -->
+      <div id="stateRejectedView" style="display: none;" class="state-result-box">
+        <div class="state-icon-bubble rejected-glow">📬</div>
+        <span class="state-pill pill-danger">SOLICITUD NO ADMITIDA</span>
+        <h2 class="state-title">Plazas Completadas</h2>
+        <p class="state-message" id="rejectedMsgText">
+          Lamentablemente tu solicitud no ha podido ser admitida para esta edición del curso debido al cupo limitado de plazas.
+        </p>
+        <button type="button" class="btn-modal-action" id="closeRejectedBtn">Cerrar</button>
+      </div>
+
+      <!-- VISTA 5: CONSULTAR ESTADO POR CORREO -->
+      <div id="checkStatusView" style="display: none;">
+        <div class="modal-header">
+          <button type="button" class="btn-back-link" id="backToQuizBtn">← Volver al formulario</button>
+          <h2 class="modal-title" style="margin-top: 12px;">Consulta el Estado de tu Solicitud</h2>
+          <p class="modal-desc">Introduce el correo electrónico con el que enviaste el formulario para verificar si has sido admitido/a.</p>
+        </div>
+
+        <form id="checkStatusForm" class="quiz-form">
+          <div class="form-row">
+            <label for="checkEmail">Tu Correo Electrónico</label>
+            <input type="email" id="checkEmail" placeholder="tu.correo@ejemplo.com" required />
+            <span class="field-error" id="checkError"></span>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-submit-quiz" id="btnCheckSubmit">
+              <span>Consultar Mi Estado</span>
+              <span class="arrow">→</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
